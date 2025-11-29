@@ -4,7 +4,7 @@
 const CONFIG = {
   GEMINI_API_KEY:
     localStorage.getItem("gemini_api_key") ||
-    "AIzaSyBtqXt_tpiGSPB2LFLqIfsU5lwqDtSY3dA",
+    "",
   GEMINI_API_URL:
     "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
   REAL_TIME_UPDATE_INTERVAL: 3000,
@@ -2378,3 +2378,4 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
