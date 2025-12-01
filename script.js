@@ -118,6 +118,188 @@ document.getElementById("skipApiKey").addEventListener("click", () => {
 });
 
 // ===========================
+// Profile Management & Export
+// ===========================
+const profileData = {
+    name: localStorage.getItem('profile_name') || '',
+    email: localStorage.getItem('profile_email') || '',
+    company: localStorage.getItem('profile_company') || '',
+    phone: localStorage.getItem('profile_phone') || '',
+    location: localStorage.getItem('profile_location') || '',
+    industry: localStorage.getItem('profile_industry') || 'Retail'
+};
+
+// Open Profile Modal
+document.getElementById('userAvatarBtn').addEventListener('click', () => {
+    openProfileModal();
+});
+
+function openProfileModal() {
+    // Load saved profile data
+    document.getElementById('profileName').value = profileData.name;
+    document.getElementById('profileEmail').value = profileData.email;
+    document.getElementById('profileCompany').value = profileData.company;
+    document.getElementById('profilePhone').value = profileData.phone;
+    document.getElementById('profileLocation').value = profileData.location;
+    document.getElementById('profileIndustry').value = profileData.industry;
+    
+    document.getElementById('profileModal').style.display = 'flex';
+}
+
+// Close Profile Modal
+document.getElementById('closeProfileModal').addEventListener('click', closeProfileModal);
+document.getElementById('cancelProfile').addEventListener('click', closeProfileModal);
+
+function closeProfileModal() {
+    document.getElementById('profileModal').style.display = 'none';
+}
+
+// Save Profile
+document.getElementById('saveProfile').addEventListener('click', () => {
+    profileData.name = document.getElementById('profileName').value.trim();
+    profileData.email = document.getElementById('profileEmail').value.trim();
+    profileData.company = document.getElementById('profileCompany').value.trim();
+    profileData.phone = document.getElementById('profilePhone').value.trim();
+    profileData.location = document.getElementById('profileLocation').value.trim();
+    profileData.industry = document.getElementById('profileIndustry').value;
+    
+    // Save to localStorage
+    localStorage.setItem('profile_name', profileData.name);
+    localStorage.setItem('profile_email', profileData.email);
+    localStorage.setItem('profile_company', profileData.company);
+    localStorage.setItem('profile_phone', profileData.phone);
+    localStorage.setItem('profile_location', profileData.location);
+    localStorage.setItem('profile_industry', profileData.industry);
+    
+    closeProfileModal();
+    showToast('Profile Updated', 'Your profile has been saved successfully', 'success');
+});
+
+// Export Profile as JSON
+document.getElementById('exportProfileJSON').addEventListener('click', () => {
+    const exportData = {
+        profile: profileData,
+        exported: new Date().toISOString(),
+        exportType: 'profile_only'
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    downloadFile(dataBlob, `profile-${Date.now()}.json`);
+    showToast('Profile Exported', 'Profile data exported as JSON', 'success');
+});
+
+// Export All Data as JSON
+document.getElementById('exportAllDataJSON').addEventListener('click', () => {
+    const exportData = {
+        profile: profileData,
+        campaigns: state.campaigns,
+        metrics: state.metrics,
+        chatHistory: state.chatHistory,
+        settings: {
+            theme: state.theme,
+            apiKey: CONFIG.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE' ? 'configured' : 'not_configured'
+        },
+        summary: {
+            totalCampaigns: state.campaigns.length,
+            activeCampaigns: state.campaigns.filter(c => c.status === 'Active').length,
+            totalImpressions: state.campaigns.reduce((sum, c) => sum + (c.metrics?.impressions || 0), 0),
+            totalClicks: state.campaigns.reduce((sum, c) => sum + (c.metrics?.clicks || 0), 0),
+            averageCTR: state.metrics.ctr
+        },
+        exported: new Date().toISOString(),
+        exportType: 'complete_data'
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    downloadFile(dataBlob, `creativesync-complete-data-${Date.now()}.json`);
+    showToast('Complete Export', 'All data exported successfully', 'success');
+});
+
+// Export Campaigns as CSV
+document.getElementById('exportCampaignsCSV').addEventListener('click', () => {
+    if (state.campaigns.length === 0) {
+        showToast('No Campaigns', 'You have no campaigns to export', 'warning');
+        return;
+    }
+    
+    const headers = [
+        'Campaign Name',
+        'Created Date',
+        'Status',
+        'Impressions',
+        'Clicks',
+        'CTR (%)',
+        'Engagement',
+        'Reach',
+        'Target Audience',
+        'Campaign Type'
+    ];
+    
+    const rows = state.campaigns.map(c => [
+        `"${c.name}"`,
+        new Date(c.created).toLocaleDateString('en-IN'),
+        c.status,
+        c.metrics?.impressions || 0,
+        c.metrics?.clicks || 0,
+        c.metrics?.ctr || '0.00',
+        c.metrics?.engagement || 'N/A',
+        c.metrics?.reach || 'N/A',
+        c.metadata?.audience || 'N/A',
+        c.metadata?.type || 'N/A'
+    ]);
+    
+    const csv = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    downloadFile(dataBlob, `campaigns-export-${Date.now()}.csv`);
+    showToast('Campaigns Exported', 'Campaign data exported as CSV', 'success');
+});
+
+// Export Analytics as CSV
+document.getElementById('exportAnalyticsCSV').addEventListener('click', () => {
+    const analyticsData = {
+        overview: [
+            ['Metric', 'Value'],
+            ['Total Campaigns', state.campaigns.length],
+            ['Active Campaigns', state.campaigns.filter(c => c.status === 'Active').length],
+            ['Total Impressions', state.metrics.impressions],
+            ['Total Clicks', state.metrics.clicks],
+            ['Average CTR', state.metrics.ctr + '%'],
+            ['Export Date', new Date().toLocaleString('en-IN')]
+        ],
+        campaigns: state.campaigns.map(c => [
+            c.name,
+            c.metrics?.impressions || 0,
+            c.metrics?.clicks || 0,
+            c.metrics?.ctr || '0.00',
+            c.status
+        ])
+    };
+    
+    let csv = '=== OVERVIEW ===\n';
+    csv += analyticsData.overview.map(row => row.join(',')).join('\n');
+    csv += '\n\n=== CAMPAIGN DETAILS ===\n';
+    csv += 'Campaign Name,Impressions,Clicks,CTR (%),Status\n';
+    csv += analyticsData.campaigns.map(row => row.join(',')).join('\n');
+    
+    const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    downloadFile(dataBlob, `analytics-export-${Date.now()}.csv`);
+    showToast('Analytics Exported', 'Analytics data exported as CSV', 'success');
+});
+
+// Close modal when clicking outside
+document.getElementById('profileModal').addEventListener('click', (e) => {
+    if (e.target.id === 'profileModal') {
+        closeProfileModal();
+    }
+});
+
+// ===========================
 // Event Listeners Setup
 // ===========================
 function setupEventListeners() {
@@ -2378,4 +2560,5 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
