@@ -1237,4 +1237,64 @@ body {
 .p-1 { padding: 0.5rem; }
 .p-2 { padding: 1rem; }
 .p-3 { padding: 1.5rem; }
+
 .p-4 { padding: 2rem; }
+
+/* ===========================
+   Profile Modal Enhancements
+   =========================== */
+.modal-content h3 {
+    font-size: 1.2rem;
+    color: var(--text-primary);
+    margin-bottom: 1rem;
+}
+
+.modal-content .form-group {
+    margin-bottom: 1.5rem;
+}
+
+.modal-content .form-group:last-of-type {
+    margin-bottom: 0;
+}
+
+.modal-content input[type="tel"],
+.modal-content input[type="email"] {
+    font-family: inherit;
+}
+
+/* User Avatar Click Effect */
+.user-avatar {
+    cursor: pointer;
+    position: relative;
+    transition: var(--transition);
+}
+
+.user-avatar:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+}
+
+.user-avatar::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: var(--success);
+    border: 2px solid var(--bg-primary);
+    border-radius: 50%;
+    transition: var(--transition);
+}
+
+/* Export Buttons Grid */
+.modal-content .btn-secondary {
+    width: 100%;
+    justify-content: center;
+    font-size: 0.85rem;
+    padding: 10px 16px;
+}
+
+.modal-content .btn-secondary:hover {
+    transform: translateY(-2px);
+}
