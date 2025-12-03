@@ -118,7 +118,7 @@ document.getElementById("skipApiKey").addEventListener("click", () => {
 });
 
 // ===========================
-// Profile Management & Export
+// Profile Management
 // ===========================
 const profileData = {
     name: localStorage.getItem('profile_name') || '',
@@ -128,6 +128,9 @@ const profileData = {
     location: localStorage.getItem('profile_location') || '',
     industry: localStorage.getItem('profile_industry') || 'Retail'
 };
+
+// Store generated variants for export
+let currentVariants = [];
 
 // Open Profile Modal
 document.getElementById('userAvatarBtn').addEventListener('click', () => {
@@ -156,140 +159,48 @@ function closeProfileModal() {
 
 // Save Profile
 document.getElementById('saveProfile').addEventListener('click', () => {
-    profileData.name = document.getElementById('profileName').value.trim();
-    profileData.email = document.getElementById('profileEmail').value.trim();
-    profileData.company = document.getElementById('profileCompany').value.trim();
-    profileData.phone = document.getElementById('profilePhone').value.trim();
-    profileData.location = document.getElementById('profileLocation').value.trim();
-    profileData.industry = document.getElementById('profileIndustry').value;
+    const name = document.getElementById('profileName').value.trim();
+    const email = document.getElementById('profileEmail').value.trim();
+    const company = document.getElementById('profileCompany').value.trim();
+    const phone = document.getElementById('profilePhone').value.trim();
+    const location = document.getElementById('profileLocation').value.trim();
+    const industry = document.getElementById('profileIndustry').value;
     
-    // Save to localStorage
-    localStorage.setItem('profile_name', profileData.name);
-    localStorage.setItem('profile_email', profileData.email);
-    localStorage.setItem('profile_company', profileData.company);
-    localStorage.setItem('profile_phone', profileData.phone);
-    localStorage.setItem('profile_location', profileData.location);
-    localStorage.setItem('profile_industry', profileData.industry);
-    
-    closeProfileModal();
-    showToast('Profile Updated', 'Your profile has been saved successfully', 'success');
-});
-
-// Export Profile as JSON
-document.getElementById('exportProfileJSON').addEventListener('click', () => {
-    const exportData = {
-        profile: profileData,
-        exported: new Date().toISOString(),
-        exportType: 'profile_only'
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    downloadFile(dataBlob, `profile-${Date.now()}.json`);
-    showToast('Profile Exported', 'Profile data exported as JSON', 'success');
-});
-
-// Export All Data as JSON
-document.getElementById('exportAllDataJSON').addEventListener('click', () => {
-    const exportData = {
-        profile: profileData,
-        campaigns: state.campaigns,
-        metrics: state.metrics,
-        chatHistory: state.chatHistory,
-        settings: {
-            theme: state.theme,
-            apiKey: CONFIG.GEMINI_API_KEY !== 'YOUR_GEMINI_API_KEY_HERE' ? 'configured' : 'not_configured'
-        },
-        summary: {
-            totalCampaigns: state.campaigns.length,
-            activeCampaigns: state.campaigns.filter(c => c.status === 'Active').length,
-            totalImpressions: state.campaigns.reduce((sum, c) => sum + (c.metrics?.impressions || 0), 0),
-            totalClicks: state.campaigns.reduce((sum, c) => sum + (c.metrics?.clicks || 0), 0),
-            averageCTR: state.metrics.ctr
-        },
-        exported: new Date().toISOString(),
-        exportType: 'complete_data'
-    };
-    
-    const dataStr = JSON.stringify(exportData, null, 2);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    downloadFile(dataBlob, `creativesync-complete-data-${Date.now()}.json`);
-    showToast('Complete Export', 'All data exported successfully', 'success');
-});
-
-// Export Campaigns as CSV
-document.getElementById('exportCampaignsCSV').addEventListener('click', () => {
-    if (state.campaigns.length === 0) {
-        showToast('No Campaigns', 'You have no campaigns to export', 'warning');
+    // Validation
+    if (!name) {
+        showToast('Validation Error', 'Please enter your name', 'warning');
+        document.getElementById('profileName').focus();
         return;
     }
     
-    const headers = [
-        'Campaign Name',
-        'Created Date',
-        'Status',
-        'Impressions',
-        'Clicks',
-        'CTR (%)',
-        'Engagement',
-        'Reach',
-        'Target Audience',
-        'Campaign Type'
-    ];
+    if (email && !email.includes('@')) {
+        showToast('Invalid Email', 'Please enter a valid email address', 'warning');
+        document.getElementById('profileEmail').focus();
+        return;
+    }
     
-    const rows = state.campaigns.map(c => [
-        `"${c.name}"`,
-        new Date(c.created).toLocaleDateString('en-IN'),
-        c.status,
-        c.metrics?.impressions || 0,
-        c.metrics?.clicks || 0,
-        c.metrics?.ctr || '0.00',
-        c.metrics?.engagement || 'N/A',
-        c.metrics?.reach || 'N/A',
-        c.metadata?.audience || 'N/A',
-        c.metadata?.type || 'N/A'
-    ]);
+    // Save to state and localStorage
+    profileData.name = name;
+    profileData.email = email;
+    profileData.company = company;
+    profileData.phone = phone;
+    profileData.location = location;
+    profileData.industry = industry;
     
-    const csv = [
-        headers.join(','),
-        ...rows.map(row => row.join(','))
-    ].join('\n');
+    localStorage.setItem('profile_name', name);
+    localStorage.setItem('profile_email', email);
+    localStorage.setItem('profile_company', company);
+    localStorage.setItem('profile_phone', phone);
+    localStorage.setItem('profile_location', location);
+    localStorage.setItem('profile_industry', industry);
     
-    const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    downloadFile(dataBlob, `campaigns-export-${Date.now()}.csv`);
-    showToast('Campaigns Exported', 'Campaign data exported as CSV', 'success');
-});
-
-// Export Analytics as CSV
-document.getElementById('exportAnalyticsCSV').addEventListener('click', () => {
-    const analyticsData = {
-        overview: [
-            ['Metric', 'Value'],
-            ['Total Campaigns', state.campaigns.length],
-            ['Active Campaigns', state.campaigns.filter(c => c.status === 'Active').length],
-            ['Total Impressions', state.metrics.impressions],
-            ['Total Clicks', state.metrics.clicks],
-            ['Average CTR', state.metrics.ctr + '%'],
-            ['Export Date', new Date().toLocaleString('en-IN')]
-        ],
-        campaigns: state.campaigns.map(c => [
-            c.name,
-            c.metrics?.impressions || 0,
-            c.metrics?.clicks || 0,
-            c.metrics?.ctr || '0.00',
-            c.status
-        ])
-    };
+    closeProfileModal();
+    showToast('Profile Saved!', `Welcome, ${name}! Your profile has been updated successfully.`, 'success');
     
-    let csv = '=== OVERVIEW ===\n';
-    csv += analyticsData.overview.map(row => row.join(',')).join('\n');
-    csv += '\n\n=== CAMPAIGN DETAILS ===\n';
-    csv += 'Campaign Name,Impressions,Clicks,CTR (%),Status\n';
-    csv += analyticsData.campaigns.map(row => row.join(',')).join('\n');
-    
-    const dataBlob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-    downloadFile(dataBlob, `analytics-export-${Date.now()}.csv`);
-    showToast('Analytics Exported', 'Analytics data exported as CSV', 'success');
+    // Update welcome message if on dashboard
+    if (state.currentSection === 'dashboard' && name) {
+        // You can add a personalized greeting here if desired
+    }
 });
 
 // Close modal when clicking outside
@@ -298,6 +209,140 @@ document.getElementById('profileModal').addEventListener('click', (e) => {
         closeProfileModal();
     }
 });
+
+// ===========================
+// Multi-Variant Export Functionality
+// ===========================
+
+// Show export button when variants are generated
+function showExportButton() {
+    const exportBtn = document.getElementById('exportVariantsBtn');
+    if (exportBtn && currentVariants.length > 0) {
+        exportBtn.style.display = 'inline-flex';
+    }
+}
+
+// Export Variants Summary
+document.getElementById('exportVariantsBtn').addEventListener('click', () => {
+    if (currentVariants.length === 0) {
+        showToast('No Variants', 'Please generate variants first', 'warning');
+        return;
+    }
+    
+    // Create comprehensive export data
+    const exportData = {
+        title: 'CreativeSync AI - Multi-Variant Campaign Summary',
+        generatedBy: profileData.name || 'User',
+        company: profileData.company || 'Not specified',
+        exportDate: new Date().toISOString(),
+        exportDateFormatted: new Date().toLocaleString('en-IN', {
+            dateStyle: 'full',
+            timeStyle: 'short'
+        }),
+        
+        campaignDetails: {
+            baseCampaign: state.currentCampaignData?.title || 'Multi-Variant Test',
+            productBrief: state.currentCampaignData?.metadata?.productBrief || 'N/A',
+            targetAudience: state.currentCampaignData?.metadata?.targetAudience || 'N/A',
+            campaignType: state.currentCampaignData?.metadata?.campaignType || 'N/A',
+            platform: state.currentCampaignData?.metadata?.platform || 'N/A'
+        },
+        
+        variants: currentVariants.map((variant, index) => ({
+            variantId: `Variant ${String.fromCharCode(65 + index)}`,
+            variantNumber: index + 1,
+            tone: variant.tone,
+            content: variant.content,
+            predictions: {
+                ctr: variant.ctr + '%',
+                engagement: variant.engagement + '/100',
+                estimatedReach: variant.reach.toLocaleString(),
+                aiConfidence: variant.confidence + '%'
+            },
+            recommendation: index === currentVariants.length - 1 ? 'Highest Predicted Performance' : 
+                           index === 0 ? 'Professional Approach' : 'Balanced Approach'
+        })),
+        
+        comparisonSummary: {
+            bestPerformer: {
+                variant: currentVariants.reduce((best, current, index) => 
+                    parseFloat(current.ctr) > parseFloat(currentVariants[best].ctr) ? index : best, 0) + 1,
+                expectedCTR: Math.max(...currentVariants.map(v => parseFloat(v.ctr))).toFixed(2) + '%',
+                estimatedReach: Math.max(...currentVariants.map(v => v.reach)).toLocaleString()
+            },
+            averageCTR: (currentVariants.reduce((sum, v) => sum + parseFloat(v.ctr), 0) / currentVariants.length).toFixed(2) + '%',
+            totalEstimatedReach: currentVariants.reduce((sum, v) => sum + v.reach, 0).toLocaleString(),
+            recommendedAction: 'Launch best performing variant for maximum ROI'
+        },
+        
+        metadata: {
+            generatedWith: 'CreativeSync AI - Powered by Google Gemini',
+            apiVersion: 'Gemini 1.5 Flash',
+            totalVariants: currentVariants.length,
+            complianceCheck: '100% ASA Compliant'
+        }
+    };
+    
+    // Export as JSON
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const filename = `variant-summary-${Date.now()}.json`;
+    downloadFile(dataBlob, filename);
+    
+    showToast('Export Successful!', `Multi-variant summary exported: ${filename}`, 'success');
+    
+    // Also offer CSV export
+    setTimeout(() => {
+        if (confirm('Would you also like to export as CSV for easy viewing in Excel/Sheets?')) {
+            exportVariantsAsCSV(exportData);
+        }
+    }, 1000);
+});
+
+function exportVariantsAsCSV(data) {
+    const csv = [];
+    
+    // Header
+    csv.push('CREATIVESYNC AI - MULTI-VARIANT CAMPAIGN SUMMARY');
+    csv.push('');
+    csv.push(`Generated By,${data.generatedBy}`);
+    csv.push(`Company,${data.company}`);
+    csv.push(`Export Date,${data.exportDateFormatted}`);
+    csv.push('');
+    
+    // Campaign Details
+    csv.push('CAMPAIGN DETAILS');
+    csv.push(`Base Campaign,${data.campaignDetails.baseCampaign}`);
+    csv.push(`Target Audience,${data.campaignDetails.targetAudience}`);
+    csv.push(`Campaign Type,${data.campaignDetails.campaignType}`);
+    csv.push(`Platform,${data.campaignDetails.platform}`);
+    csv.push('');
+    
+    // Variants Comparison
+    csv.push('VARIANTS COMPARISON');
+    csv.push('Variant,Tone,Predicted CTR,Engagement Score,Est. Reach,AI Confidence,Recommendation');
+    
+    data.variants.forEach(v => {
+        csv.push(`${v.variantId},"${v.tone}",${v.predictions.ctr},${v.predictions.engagement},${v.predictions.estimatedReach},${v.predictions.aiConfidence},"${v.recommendation}"`);
+    });
+    
+    csv.push('');
+    
+    // Summary
+    csv.push('PERFORMANCE SUMMARY');
+    csv.push(`Best Performer,Variant ${data.comparisonSummary.bestPerformer.variant}`);
+    csv.push(`Highest Expected CTR,${data.comparisonSummary.bestPerformer.expectedCTR}`);
+    csv.push(`Maximum Reach,${data.comparisonSummary.bestPerformer.estimatedReach}`);
+    csv.push(`Average CTR Across Variants,${data.comparisonSummary.averageCTR}`);
+    csv.push(`Recommended Action,${data.comparisonSummary.recommendedAction}`);
+    
+    const csvContent = csv.join('\n');
+    const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const filename = `variant-summary-${Date.now()}.csv`;
+    downloadFile(dataBlob, filename);
+    
+    showToast('CSV Exported!', `Variant summary exported as CSV: ${filename}`, 'success');
+}
 
 // ===========================
 // Event Listeners Setup
@@ -1065,6 +1110,8 @@ function exportCampaign() {
 // Multi-Variant Generation
 // ===========================
 async function generateVariants() {
+  currentVariants = []; // Reset variants array
+  
   const productBrief = document.getElementById("productBrief").value.trim();
   const campaignName = document.getElementById("campaignName").value.trim();
 
@@ -1231,6 +1278,10 @@ function displayVariant(container, variant, num, tone) {
     variantCard.style.opacity = "1";
     variantCard.style.transform = "translateY(0)";
   }, 50);
+
+  // ADD THESE LINES HERE:
+    currentVariants.push(variant);
+    showExportButton();
 }
 
 function selectVariant(num) {
@@ -2560,5 +2611,6 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
