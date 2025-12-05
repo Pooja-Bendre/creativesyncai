@@ -92,7 +92,7 @@ function checkAPIKey() {
 }
 
 // ===========================
-// Profile Management - Fixed
+// Profile Management - Clerk Style
 // ===========================
 const profileData = {
     name: localStorage.getItem('profile_name') || '',
@@ -103,26 +103,14 @@ const profileData = {
     industry: localStorage.getItem('profile_industry') || 'Retail'
 };
 
-// Store generated variants for export
-let currentVariants = [];
-
-// IMPORTANT: Prevent profile from opening with API modal
-let isInitialLoad = true;
-
-// Open Profile Modal - ONLY when user clicks
+// Open Profile Modal
 document.getElementById('userAvatarBtn').addEventListener('click', (e) => {
     e.stopPropagation();
     openProfileModal();
 });
 
 function openProfileModal() {
-    // Close API modal if open
-    const apiModal = document.getElementById('apiKeyModal');
-    if (apiModal) {
-        apiModal.style.display = 'none';
-    }
-    
-    // Load saved profile data
+    // Load saved data
     document.getElementById('profileName').value = profileData.name;
     document.getElementById('profileEmail').value = profileData.email;
     document.getElementById('profileCompany').value = profileData.company;
@@ -130,20 +118,40 @@ function openProfileModal() {
     document.getElementById('profileLocation').value = profileData.location;
     document.getElementById('profileIndustry').value = profileData.industry;
     
-    // Show profile modal
-    const profileModal = document.getElementById('profileModal');
-    profileModal.style.display = 'flex';
+    // Show modal
+    document.getElementById('profileModal').style.display = 'flex';
+    
+    // Prevent body scroll
+    document.body.style.overflow = 'hidden';
 }
 
 // Close Profile Modal
+function closeProfileModal() {
+    document.getElementById('profileModal').style.display = 'none';
+    document.body.style.overflow = '';
+}
+
 document.getElementById('closeProfileModal').addEventListener('click', closeProfileModal);
 document.getElementById('cancelProfile').addEventListener('click', closeProfileModal);
 
-function closeProfileModal() {
-    document.getElementById('profileModal').style.display = 'none';
-}
+// Close on outside click
+document.getElementById('profileModal').addEventListener('click', (e) => {
+    if (e.target.id === 'profileModal') {
+        closeProfileModal();
+    }
+});
 
-// Save Profile with Validation
+// Close on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('profileModal');
+        if (modal && modal.style.display === 'flex') {
+            closeProfileModal();
+        }
+    }
+});
+
+// Save Profile
 document.getElementById('saveProfile').addEventListener('click', () => {
     const name = document.getElementById('profileName').value.trim();
     const email = document.getElementById('profileEmail').value.trim();
@@ -165,7 +173,7 @@ document.getElementById('saveProfile').addEventListener('click', () => {
         return;
     }
     
-    // Save to state and localStorage
+    // Save to localStorage
     profileData.name = name;
     profileData.email = email;
     profileData.company = company;
@@ -182,21 +190,20 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     
     closeProfileModal();
     
-    showToast('Profile Saved! 🎉', `Welcome, ${name}! Your profile is updated.`, 'success');
+    showToast('Profile Saved! 🎉', `Welcome back, ${name}!`, 'success');
 });
 
-// Close modals when clicking outside
-document.getElementById('profileModal').addEventListener('click', (e) => {
-    if (e.target.id === 'profileModal') {
-        closeProfileModal();
-    }
-});
+// Store variants for export
+let currentVariants = [];
 
-document.getElementById('apiKeyModal').addEventListener('click', (e) => {
-    if (e.target.id === 'apiKeyModal') {
-        // Don't close API modal on outside click during initial load
+function showExportButton() {
+    const exportBtn = document.getElementById('exportVariantsBtn');
+    if (exportBtn && currentVariants.length > 0) {
+        exportBtn.style.display = 'inline-flex';
     }
-});
+}
+
+// Rest of export code remains same...
 
 // ===========================
 // Multi-Variant Export Functionality
@@ -2737,6 +2744,7 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
 
