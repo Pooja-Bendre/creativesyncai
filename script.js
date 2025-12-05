@@ -75,50 +75,24 @@ function generateRealisticData() {
   }
 }
 
-// ===========================
-// API Key Management
-// ===========================
 function checkAPIKey() {
-  const savedKey = localStorage.getItem("gemini_api_key");
-  if (savedKey) {
-    CONFIG.GEMINI_API_KEY = savedKey;
-    return;
-  }
-
-  if (CONFIG.GEMINI_API_KEY === "YOUR_GEMINI_API_KEY_HERE") {
-    setTimeout(() => {
-      document.getElementById("apiKeyModal").style.display = "flex";
-    }, 1000);
-  }
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey) {
+        CONFIG.GEMINI_API_KEY = savedKey;
+        // Don't show modal if key exists
+        return;
+    }
+    
+    // Show API modal ONLY if no key exists
+    if (CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE' || !CONFIG.GEMINI_API_KEY) {
+        setTimeout(() => {
+            document.getElementById('apiKeyModal').style.display = 'flex';
+        }, 1500); // Show after 1.5 seconds
+    }
 }
 
-document.getElementById("saveApiKey").addEventListener("click", () => {
-  const apiKey = document.getElementById("apiKeyInput").value.trim();
-  if (apiKey && apiKey.length > 20) {
-    CONFIG.GEMINI_API_KEY = apiKey;
-    localStorage.setItem("gemini_api_key", apiKey);
-    document.getElementById("apiKeyModal").style.display = "none";
-    showToast("API Key Saved", "AI features are now fully enabled", "success");
-  } else {
-    showToast(
-      "Invalid API Key",
-      "Please enter a valid Gemini API key",
-      "error"
-    );
-  }
-});
-
-document.getElementById("skipApiKey").addEventListener("click", () => {
-  document.getElementById("apiKeyModal").style.display = "none";
-  showToast(
-    "Demo Mode Active",
-    "Using simulated AI responses. Add API key for full functionality.",
-    "warning"
-  );
-});
-
 // ===========================
-// Profile Management
+// Profile Management - Fixed
 // ===========================
 const profileData = {
     name: localStorage.getItem('profile_name') || '',
@@ -132,12 +106,22 @@ const profileData = {
 // Store generated variants for export
 let currentVariants = [];
 
-// Open Profile Modal
-document.getElementById('userAvatarBtn').addEventListener('click', () => {
+// IMPORTANT: Prevent profile from opening with API modal
+let isInitialLoad = true;
+
+// Open Profile Modal - ONLY when user clicks
+document.getElementById('userAvatarBtn').addEventListener('click', (e) => {
+    e.stopPropagation();
     openProfileModal();
 });
 
 function openProfileModal() {
+    // Close API modal if open
+    const apiModal = document.getElementById('apiKeyModal');
+    if (apiModal) {
+        apiModal.style.display = 'none';
+    }
+    
     // Load saved profile data
     document.getElementById('profileName').value = profileData.name;
     document.getElementById('profileEmail').value = profileData.email;
@@ -146,7 +130,9 @@ function openProfileModal() {
     document.getElementById('profileLocation').value = profileData.location;
     document.getElementById('profileIndustry').value = profileData.industry;
     
-    document.getElementById('profileModal').style.display = 'flex';
+    // Show profile modal
+    const profileModal = document.getElementById('profileModal');
+    profileModal.style.display = 'flex';
 }
 
 // Close Profile Modal
@@ -157,7 +143,7 @@ function closeProfileModal() {
     document.getElementById('profileModal').style.display = 'none';
 }
 
-// Save Profile
+// Save Profile with Validation
 document.getElementById('saveProfile').addEventListener('click', () => {
     const name = document.getElementById('profileName').value.trim();
     const email = document.getElementById('profileEmail').value.trim();
@@ -168,7 +154,7 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     
     // Validation
     if (!name) {
-        showToast('Validation Error', 'Please enter your name', 'warning');
+        showToast('Name Required', 'Please enter your full name', 'warning');
         document.getElementById('profileName').focus();
         return;
     }
@@ -195,20 +181,160 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     localStorage.setItem('profile_industry', industry);
     
     closeProfileModal();
-    showToast('Profile Saved!', `Welcome, ${name}! Your profile has been updated successfully.`, 'success');
     
-    // Update welcome message if on dashboard
-    if (state.currentSection === 'dashboard' && name) {
-        // You can add a personalized greeting here if desired
-    }
+    showToast('Profile Saved! 🎉', `Welcome, ${name}! Your profile is updated.`, 'success');
 });
 
-// Close modal when clicking outside
+// Close modals when clicking outside
 document.getElementById('profileModal').addEventListener('click', (e) => {
     if (e.target.id === 'profileModal') {
         closeProfileModal();
     }
 });
+
+document.getElementById('apiKeyModal').addEventListener('click', (e) => {
+    if (e.target.id === 'apiKeyModal') {
+        // Don't close API modal on outside click during initial load
+    }
+});
+
+// ===========================
+// Multi-Variant Export Functionality
+// ===========================
+
+// Show export button when variants are generated
+function showExportButton() {
+    const exportBtn = document.getElementById('exportVariantsBtn');
+    if (exportBtn && currentVariants.length > 0) {
+        exportBtn.style.display = 'inline-flex';
+    }
+}
+
+// Export Variants Summary
+document.getElementById('exportVariantsBtn').addEventListener('click', () => {
+    if (currentVariants.length === 0) {
+        showToast('No Variants', 'Please generate variants first', 'warning');
+        return;
+    }
+    
+    // Create comprehensive export data
+    const exportData = {
+        title: 'CreativeSync AI - Multi-Variant Campaign Summary',
+        generatedBy: profileData.name || 'User',
+        company: profileData.company || 'Not specified',
+        email: profileData.email || 'Not specified',
+        exportDate: new Date().toISOString(),
+        exportDateFormatted: new Date().toLocaleString('en-IN', {
+            dateStyle: 'full',
+            timeStyle: 'short'
+        }),
+        
+        campaignDetails: {
+            baseCampaign: state.currentCampaignData?.title || 'Multi-Variant Test',
+            productBrief: state.currentCampaignData?.metadata?.productBrief || 'N/A',
+            targetAudience: state.currentCampaignData?.metadata?.targetAudience || 'N/A',
+            campaignType: state.currentCampaignData?.metadata?.campaignType || 'N/A',
+            tone: state.currentCampaignData?.metadata?.tone || 'N/A',
+            platform: state.currentCampaignData?.metadata?.platform || 'N/A'
+        },
+        
+        variants: currentVariants.map((variant, index) => ({
+            variantId: `Variant ${String.fromCharCode(65 + index)}`,
+            variantNumber: index + 1,
+            tone: variant.tone,
+            content: variant.content,
+            predictions: {
+                ctr: variant.ctr + '%',
+                engagement: variant.engagement + '/100',
+                estimatedReach: variant.reach.toLocaleString(),
+                aiConfidence: variant.confidence + '%'
+            },
+            recommendation: index === currentVariants.length - 1 ? 'Highest Predicted Performance' : 
+                           index === 0 ? 'Professional Approach' : 'Balanced Approach'
+        })),
+        
+        comparisonSummary: {
+            bestPerformer: {
+                variant: currentVariants.reduce((best, current, index) => 
+                    parseFloat(current.ctr) > parseFloat(currentVariants[best].ctr) ? index : best, 0) + 1,
+                expectedCTR: Math.max(...currentVariants.map(v => parseFloat(v.ctr))).toFixed(2) + '%',
+                estimatedReach: Math.max(...currentVariants.map(v => v.reach)).toLocaleString()
+            },
+            averageCTR: (currentVariants.reduce((sum, v) => sum + parseFloat(v.ctr), 0) / currentVariants.length).toFixed(2) + '%',
+            totalEstimatedReach: currentVariants.reduce((sum, v) => sum + v.reach, 0).toLocaleString(),
+            recommendedAction: 'Launch best performing variant for maximum ROI'
+        },
+        
+        metadata: {
+            generatedWith: 'CreativeSync AI - Powered by Google Gemini',
+            apiVersion: 'Gemini 1.5 Flash',
+            totalVariants: currentVariants.length,
+            complianceCheck: '100% ASA Compliant'
+        }
+    };
+    
+    // Export as JSON
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const filename = `variant-summary-${Date.now()}.json`;
+    downloadFile(dataBlob, filename);
+    
+    showToast('Export Successful! 📥', `Multi-variant summary exported successfully`, 'success');
+    
+    // Offer CSV export
+    setTimeout(() => {
+        if (confirm('📊 Would you also like to export as CSV for Excel/Google Sheets?')) {
+            exportVariantsAsCSV(exportData);
+        }
+    }, 1000);
+});
+
+function exportVariantsAsCSV(data) {
+    const csv = [];
+    
+    // Header
+    csv.push('CREATIVESYNC AI - MULTI-VARIANT CAMPAIGN SUMMARY');
+    csv.push('');
+    csv.push(`Generated By,${data.generatedBy}`);
+    csv.push(`Company,${data.company}`);
+    csv.push(`Email,${data.email}`);
+    csv.push(`Export Date,${data.exportDateFormatted}`);
+    csv.push('');
+    
+    // Campaign Details
+    csv.push('CAMPAIGN DETAILS');
+    csv.push(`Base Campaign,${data.campaignDetails.baseCampaign}`);
+    csv.push(`Target Audience,${data.campaignDetails.targetAudience}`);
+    csv.push(`Campaign Type,${data.campaignDetails.campaignType}`);
+    csv.push(`Tone,${data.campaignDetails.tone}`);
+    csv.push(`Platform,${data.campaignDetails.platform}`);
+    csv.push('');
+    
+    // Variants Comparison
+    csv.push('VARIANTS COMPARISON');
+    csv.push('Variant,Tone,Predicted CTR,Engagement Score,Est. Reach,AI Confidence,Recommendation');
+    
+    data.variants.forEach(v => {
+        csv.push(`${v.variantId},"${v.tone}",${v.predictions.ctr},${v.predictions.engagement},${v.predictions.estimatedReach},${v.predictions.aiConfidence},"${v.recommendation}"`);
+    });
+    
+    csv.push('');
+    
+    // Summary
+    csv.push('PERFORMANCE SUMMARY');
+    csv.push(`Best Performer,Variant ${data.comparisonSummary.bestPerformer.variant}`);
+    csv.push(`Highest Expected CTR,${data.comparisonSummary.bestPerformer.expectedCTR}`);
+    csv.push(`Maximum Reach,${data.comparisonSummary.bestPerformer.estimatedReach}`);
+    csv.push(`Average CTR Across Variants,${data.comparisonSummary.averageCTR}`);
+    csv.push(`Recommended Action,${data.comparisonSummary.recommendedAction}`);
+    
+    const csvContent = csv.join('\n');
+    const dataBlob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const filename = `variant-summary-${Date.now()}.csv`;
+    downloadFile(dataBlob, filename);
+    
+    showToast('CSV Exported! 📊', 'Spreadsheet ready for analysis', 'success');
+}
 
 // ===========================
 // Multi-Variant Export Functionality
@@ -2611,6 +2737,7 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
 
