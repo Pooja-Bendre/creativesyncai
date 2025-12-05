@@ -388,86 +388,136 @@
     </div>
 
     <!-- API Key Modal -->
-    <div id="apiKeyModal" class="modal">
-        <div class="modal-content">
-            <h2>Configure Gemini API</h2>
-            <p>Enter your Google Gemini API key to enable AI features</p>
-            <input type="password" id="apiKeyInput" placeholder="Enter your API key">
-            <div class="modal-actions">
-                <button class="btn-secondary" id="skipApiKey">Skip for Now</button>
-                <button class="btn-primary" id="saveApiKey">Save & Continue</button>
+    <!-- API Key Modal -->
+<div id="apiKeyModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 500px; border-radius: 20px; overflow: hidden;">
+        <!-- Header with Icon -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; text-align: center;">
+            <div style="width: 60px; height: 60px; margin: 0 auto 1rem; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i class="fas fa-key" style="font-size: 1.8rem; color: #667eea;"></i>
+            </div>
+            <h2 style="color: white; margin: 0; font-size: 1.4rem;">Configure Gemini API</h2>
+            <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Enable AI-powered features</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 2rem;">
+            <p style="color: var(--text-secondary); margin-bottom: 1rem; text-align: center;">
+                Enter your Google Gemini API key to unlock all AI features
+            </p>
+            
+            <div style="background: var(--bg-secondary); padding: 1rem; border-radius: 10px; margin-bottom: 1.5rem;">
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin: 0;">
+                    <i class="fas fa-info-circle" style="color: #667eea;"></i>
+                    Get your free API key at: <a href="https://makersuite.google.com/app/apikey" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600;">makersuite.google.com</a>
+                </p>
+            </div>
+            
+            <input type="password" id="apiKeyInput" placeholder="Enter your API key (e.g., AIza...)" style="width: 100%; padding: 12px 16px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem; margin-bottom: 1.5rem;">
+            
+            <div class="modal-actions" style="display: flex; gap: 1rem;">
+                <button class="btn-secondary" id="skipApiKey" style="flex: 1;">
+                    <i class="fas fa-forward"></i>
+                    Skip for Now
+                </button>
+                <button class="btn-primary" id="saveApiKey" style="flex: 1;">
+                    <i class="fas fa-check"></i>
+                    Save & Continue
+                </button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Profile Modal -->
-<!-- Profile Modal -->
+<!-- Profile Modal - Beautiful Card Design -->
 <div id="profileModal" class="modal" style="display: none;">
-    <div class="modal-content profile-modal-content">
-        <div class="profile-header">
-            <div>
-                <h2><i class="fas fa-user-circle"></i> Profile Settings</h2>
-                <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.5rem;">Manage your account information</p>
-            </div>
-            <button class="icon-btn" id="closeProfileModal">
+    <div class="modal-content" style="max-width: 550px; border-radius: 20px; overflow: hidden;">
+        <!-- Profile Header with Gradient -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; text-align: center; position: relative;">
+            <button class="icon-btn" id="closeProfileModal" style="position: absolute; top: 1rem; right: 1rem; background: rgba(255,255,255,0.2); color: white; border: none;">
                 <i class="fas fa-times"></i>
             </button>
+            
+            <div style="width: 80px; height: 80px; margin: 0 auto 1rem; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(0,0,0,0.2);">
+                <i class="fas fa-user" style="font-size: 2.5rem; color: #667eea;"></i>
+            </div>
+            
+            <h2 style="color: white; margin: 0; font-size: 1.5rem;">Profile Settings</h2>
+            <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Manage your account information</p>
         </div>
         
-        <div class="profile-content">
-            <div class="profile-form">
-                <div class="form-group">
-                    <label><i class="fas fa-user"></i> Full Name</label>
-                    <input type="text" id="profileName" placeholder="Enter your full name">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-envelope"></i> Email Address</label>
-                    <input type="email" id="profileEmail" placeholder="your.email@example.com">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-building"></i> Company/Business Name</label>
-                    <input type="text" id="profileCompany" placeholder="Your company name">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-phone"></i> Phone Number</label>
-                    <input type="tel" id="profilePhone" placeholder="+91 98765 43210">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-map-marker-alt"></i> Location</label>
-                    <input type="text" id="profileLocation" placeholder="City, State, Country">
-                </div>
-                
-                <div class="form-group">
-                    <label><i class="fas fa-industry"></i> Industry</label>
-                    <select id="profileIndustry">
-                        <option>Retail</option>
-                        <option>E-commerce</option>
-                        <option>Fashion</option>
-                        <option>Food & Beverage</option>
-                        <option>Technology</option>
-                        <option>Healthcare</option>
-                        <option>Education</option>
-                        <option>Real Estate</option>
-                        <option>FMCG</option>
-                        <option>Automotive</option>
-                        <option>Travel & Tourism</option>
-                        <option>Media & Entertainment</option>
-                        <option>Other</option>
-                    </select>
-                </div>
+        <!-- Profile Form -->
+        <div style="padding: 2rem;">
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-user" style="color: #667eea;"></i>
+                    Full Name
+                </label>
+                <input type="text" id="profileName" placeholder="Enter your full name" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-envelope" style="color: #667eea;"></i>
+                    Email Address
+                </label>
+                <input type="email" id="profileEmail" placeholder="your.email@example.com" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-building" style="color: #667eea;"></i>
+                    Company/Business Name
+                </label>
+                <input type="text" id="profileCompany" placeholder="Your company name" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-phone" style="color: #667eea;"></i>
+                    Phone Number
+                </label>
+                <input type="tel" id="profilePhone" placeholder="+91 98765 43210" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+            </div>
+            
+            <div class="form-group">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-map-marker-alt" style="color: #667eea;"></i>
+                    Location
+                </label>
+                <input type="text" id="profileLocation" placeholder="City, State, Country" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+            </div>
+            
+            <div class="form-group" style="margin-bottom: 0;">
+                <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px; font-weight: 600;">
+                    <i class="fas fa-industry" style="color: #667eea;"></i>
+                    Industry
+                </label>
+                <select id="profileIndustry" style="width: 100%; padding: 12px; border: 2px solid var(--border-color); border-radius: 10px; font-size: 0.95rem;">
+                    <option>Retail</option>
+                    <option>E-commerce</option>
+                    <option>Fashion</option>
+                    <option>Food & Beverage</option>
+                    <option>Technology</option>
+                    <option>Healthcare</option>
+                    <option>Education</option>
+                    <option>Real Estate</option>
+                    <option>FMCG</option>
+                    <option>Automotive</option>
+                    <option>Travel & Tourism</option>
+                    <option>Media & Entertainment</option>
+                    <option>Other</option>
+                </select>
             </div>
         </div>
         
-        <div class="modal-actions profile-actions">
-            <button class="btn-secondary" id="cancelProfile">
+        <!-- Action Buttons -->
+        <div style="padding: 0 2rem 2rem 2rem; display: flex; gap: 1rem;">
+            <button class="btn-secondary" id="cancelProfile" style="flex: 1;">
                 <i class="fas fa-times"></i>
                 Cancel
             </button>
-            <button class="btn-primary" id="saveProfile">
+            <button class="btn-primary" id="saveProfile" style="flex: 1;">
                 <i class="fas fa-save"></i>
                 Save Profile
             </button>
@@ -480,4 +530,5 @@
 </body>
 
 </html>
+
 
