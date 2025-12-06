@@ -277,6 +277,20 @@ document.addEventListener('keydown', (e) => {
 // Initialize
 updateUserNameDisplay();
 
+// API Settings Button - Fixed with proper event listener
+setTimeout(() => {
+    const apiBtn = document.getElementById('apiSettingsBtn');
+    if (apiBtn) {
+        apiBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            document.getElementById('apiKeyInput').value = '';
+            document.getElementById('apiKeyModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        });
+    }
+}, 100);
+
 // ===========================
 // Export as PDF/TXT
 // ===========================
@@ -327,6 +341,40 @@ document.getElementById('exportAnalyticsTXT').addEventListener('click', () => {
     URL.revokeObjectURL(url);
     
     showToast('TXT Exported!', 'Analytics report downloaded', 'success');
+});
+
+// Get Started Button - Scroll to Dashboard
+document.getElementById('getStartedBtn')?.addEventListener('click', () => {
+    document.querySelector('.main-container').scrollIntoView({ 
+        behavior: 'smooth' 
+    });
+    showToast('Welcome! 🎉', 'Start creating amazing campaigns', 'success');
+});
+
+// Feature Box Interactions
+document.querySelectorAll('.feature-box').forEach(box => {
+    box.addEventListener('click', () => {
+        const feature = box.dataset.feature;
+        const sectionMap = {
+            'ai-generation': 'create',
+            'multi-variant': 'variants',
+            'real-time': 'dashboard',
+            'voice': 'create',
+            'trends': 'trends',
+            'compliance': 'create',
+            'export': 'analytics',
+            'chat': 'chat'
+        };
+        
+        if (sectionMap[feature]) {
+            document.querySelector('.main-container').scrollIntoView({ 
+                behavior: 'smooth' 
+            });
+            setTimeout(() => {
+                handleNavigation(sectionMap[feature]);
+            }, 800);
+        }
+    });
 });
 
 function generateAnalyticsReport() {
@@ -2978,6 +3026,7 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
 
