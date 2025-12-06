@@ -16,17 +16,20 @@
                 <span>CreativeSync AI</span>
             </div>
             <div class="nav-actions">
-                <button class="icon-btn" id="themeToggle" title="Toggle Theme">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <button class="icon-btn notification-btn" id="notificationBtn">
-                    <i class="fas fa-bell"></i>
-                    <span class="notification-badge">3</span>
-                </button>
-                <div class="user-avatar" id="userAvatarBtn" title="Profile Settings">
-                     <i class="fas fa-user"></i>
-                </div>
-            </div>
+    <button class="icon-btn" id="themeToggle" title="Toggle Theme">
+        <i class="fas fa-moon"></i>
+    </button>
+    <button class="icon-btn notification-btn" id="notificationBtn">
+        <i class="fas fa-bell"></i>
+        <span class="notification-badge">3</span>
+    </button>
+    <div class="user-info" id="userAvatarBtn" title="Profile Settings">
+        <span class="user-name" id="userNameDisplay">Guest User</span>
+        <div class="user-avatar">
+            <i class="fas fa-user"></i>
+        </div>
+    </div>
+</div>
         </div>
     </nav>
 
@@ -288,36 +291,40 @@
             <div id="variantsContainer" class="variants-grid"></div>
         </section>
             <!-- Analytics Section -->
-            <section id="analytics" class="section">
-                <div class="section-header">
-                    <h1>Advanced Analytics</h1>
-                    <div class="export-buttons">
-                        <button class="btn-secondary" id="exportJSON">
-                            <i class="fas fa-file-code"></i>
-                            Export JSON
-                        </button>
-                        <button class="btn-secondary" id="exportCSV">
-                            <i class="fas fa-file-csv"></i>
-                            Export CSV
-                        </button>
-                    </div>
-                </div>
+<section id="analytics" class="section">
+    <div class="section-header">
+        <h1>Advanced Analytics</h1>
+        <div class="export-buttons">
+            <button class="btn-secondary" id="exportAnalyticsPDF">
+                <i class="fas fa-file-pdf"></i>
+                Export PDF
+            </button>
+            <button class="btn-secondary" id="exportAnalyticsTXT">
+                <i class="fas fa-file-alt"></i>
+                Export TXT
+            </button>
+        </div>
+    </div>
 
-                <div class="analytics-grid">
-                    <div class="chart-card full-width">
-                        <h3>Campaign Performance Comparison</h3>
-                        <canvas id="comparisonChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Audience Segments</h3>
-                        <canvas id="audienceChart"></canvas>
-                    </div>
-                    <div class="chart-card">
-                        <h3>Conversion Funnel</h3>
-                        <canvas id="funnelChart"></canvas>
-                    </div>
-                </div>
-            </section>
+    <!-- Single Row Charts -->
+    <div class="analytics-charts-row">
+        <div class="chart-card">
+            <h3>Campaign Performance</h3>
+            <canvas id="comparisonChart"></canvas>
+        </div>
+    </div>
+    
+    <div class="analytics-charts-row">
+        <div class="chart-card-half">
+            <h3>Audience Segments</h3>
+            <canvas id="audienceChart"></canvas>
+        </div>
+        <div class="chart-card-half">
+            <h3>Conversion Funnel</h3>
+            <canvas id="funnelChart"></canvas>
+        </div>
+    </div>
+</section>
 
             <!-- Trends Section -->
             <section id="trends" class="section">
@@ -387,18 +394,38 @@
         </div>
     </div>
 
-    <!-- API Key Modal -->
-    <!-- API Key Modal -->
-<div id="apiKeyModal" class="modal" style="display: none;">
-    <div class="modal-content" style="max-width: 500px; border-radius: 20px; overflow: hidden;">
-        <!-- Header with Icon -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 2rem; text-align: center;">
-            <div style="width: 60px; height: 60px; margin: 0 auto 1rem; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
-                <i class="fas fa-key" style="font-size: 1.8rem; color: #667eea;"></i>
+    <!-- API Key Modal - Centered Like Clerk -->
+<div id="apiKeyModal" class="modal-overlay" style="display: none;">
+    <div class="api-modal-card">
+        <div class="api-modal-header">
+            <div class="api-icon">
+                <i class="fas fa-key"></i>
             </div>
-            <h2 style="color: white; margin: 0; font-size: 1.4rem;">Configure Gemini API</h2>
-            <p style="color: rgba(255,255,255,0.9); margin: 0.5rem 0 0 0; font-size: 0.9rem;">Enable AI-powered features</p>
+            <h2>Configure Gemini API</h2>
+            <p>Enable AI-powered features</p>
         </div>
+        
+        <div class="api-modal-body">
+            <div class="api-info-box">
+                <i class="fas fa-info-circle"></i>
+                <span>Get your free API key at: <a href="https://makersuite.google.com/app/apikey" target="_blank">makersuite.google.com</a></span>
+            </div>
+            
+            <input type="password" id="apiKeyInput" placeholder="Enter your API key (e.g., AIza...)">
+            
+            <div class="api-modal-actions">
+                <button class="api-btn-skip" id="skipApiKey">
+                    <i class="fas fa-forward"></i>
+                    Skip for Now
+                </button>
+                <button class="api-btn-save" id="saveApiKey">
+                    <i class="fas fa-check"></i>
+                    Save & Continue
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
         
         <!-- Content -->
         <div style="padding: 2rem;">
@@ -542,6 +569,7 @@
 </body>
 
 </html>
+
 
 
 
