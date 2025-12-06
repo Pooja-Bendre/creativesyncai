@@ -1918,5 +1918,29 @@ body {
         transform: translateY(0) scale(1);
     }
 }
+/* ===========================
+   API Settings Button Status Indicator
+   =========================== */
+#apiSettingsBtn {
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+#apiSettingsBtn::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 8px;
+    height: 8px;
+    background: #f59e0b;
+    border: 2px solid var(--bg-primary);
+    border-radius: 50%;
+    transition: all 0.3s ease;
+}
+
+#apiSettingsBtn:hover {
+    transform: translateY(-2px) scale(1.1);
+}
 
 
