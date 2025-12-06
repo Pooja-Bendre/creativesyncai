@@ -1544,4 +1544,379 @@ body {
         padding: 15px 20px 20px 20px;
     }
 }
+/* ===========================
+   Modal Overlay - Universal
+   =========================== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+}
+
+/* ===========================
+   API Key Modal - Clerk Style
+   =========================== */
+.api-modal-card {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 450px;
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.api-modal-header {
+    text-align: center;
+    padding: 40px 30px 30px 30px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 16px 16px 0 0;
+}
+
+.api-icon {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 20px;
+    background: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.api-icon i {
+    font-size: 1.8rem;
+    color: #667eea;
+}
+
+.api-modal-header h2 {
+    color: white;
+    margin: 0 0 8px 0;
+    font-size: 1.5rem;
+}
+
+.api-modal-header p {
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0;
+    font-size: 0.95rem;
+}
+
+.api-modal-body {
+    padding: 30px;
+}
+
+.api-info-box {
+    background: var(--bg-secondary);
+    padding: 12px 16px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+}
+
+.api-info-box i {
+    color: #667eea;
+    font-size: 1.2rem;
+}
+
+.api-info-box a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.api-modal-body input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 0.95rem;
+    margin-bottom: 20px;
+    transition: all 0.3s ease;
+}
+
+.api-modal-body input:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.api-modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.api-btn-skip,
+.api-btn-save {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+}
+
+.api-btn-skip {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.api-btn-skip:hover {
+    background: var(--bg-tertiary);
+}
+
+.api-btn-save {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.api-btn-save:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* ===========================
+   User Info Display in Navbar
+   =========================== */
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.user-info:hover {
+    background: var(--bg-tertiary);
+    transform: translateY(-2px);
+}
+
+.user-name {
+    font-weight: 600;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ===========================
+   Analytics Charts - Perfect Fit
+   =========================== */
+.analytics-charts-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.analytics-charts-row:has(.chart-card-half) {
+    grid-template-columns: 1fr 1fr;
+}
+
+.chart-card,
+.chart-card-half {
+    background: var(--bg-primary);
+    padding: 1.5rem;
+    border-radius: var(--card-radius);
+    box-shadow: 0 2px 8px var(--shadow);
+}
+
+.chart-card canvas,
+.chart-card-half canvas {
+    max-height: 350px !important;
+}
+
+@media (max-width: 1024px) {
+    .analytics-charts-row:has(.chart-card-half) {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* ===========================
+   Profile Modal (from before)
+   =========================== */
+.profile-modal-card {
+    background: var(--bg-primary);
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    width: 100%;
+    max-width: 480px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.profile-close-btn {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: var(--bg-secondary);
+    color: var(--text-secondary);
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    z-index: 10;
+}
+
+.profile-close-btn:hover {
+    background: var(--bg-tertiary);
+    color: var(--danger);
+    transform: rotate(90deg);
+}
+
+.profile-modal-header {
+    text-align: center;
+    padding: 40px 30px 30px 30px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.profile-avatar-large {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+}
+
+.profile-avatar-large i {
+    font-size: 2.5rem;
+    color: white;
+}
+
+.profile-modal-header h2 {
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+}
+
+.profile-modal-header p {
+    font-size: 0.95rem;
+    color: var(--text-secondary);
+    margin: 0;
+}
+
+.profile-modal-body {
+    padding: 30px;
+}
+
+.profile-form-group {
+    margin-bottom: 20px;
+}
+
+.profile-form-group label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+
+.profile-form-group label i {
+    color: #667eea;
+    width: 16px;
+}
+
+.profile-form-group input,
+.profile-form-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-secondary);
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+}
+
+.profile-form-group input:focus,
+.profile-form-group select:focus {
+    outline: none;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+}
+
+.profile-modal-footer {
+    padding: 20px 30px 30px 30px;
+    display: flex;
+    gap: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.profile-btn-secondary,
+.profile-btn-primary {
+    flex: 1;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.profile-btn-secondary {
+    background: var(--bg-secondary);
+    color: var(--text-primary);
+    border: 2px solid var(--border-color);
+}
+
+.profile-btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.profile-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
 
