@@ -92,7 +92,7 @@ function checkAPIKey() {
 }
 
 // ===========================
-// Profile Management - Clerk Style
+// Profile & API Management - Perfect Version
 // ===========================
 const profileData = {
     name: localStorage.getItem('profile_name') || '',
@@ -103,14 +103,70 @@ const profileData = {
     industry: localStorage.getItem('profile_industry') || 'Retail'
 };
 
-// Open Profile Modal
+let currentVariants = [];
+
+// Update user name display
+function updateUserNameDisplay() {
+    const displayName = profileData.name || 'Guest User';
+    const nameElement = document.getElementById('userNameDisplay');
+    if (nameElement) {
+        nameElement.textContent = displayName;
+    }
+}
+
+// Check API Key on load
+function checkAPIKey() {
+    const savedKey = localStorage.getItem('gemini_api_key');
+    if (savedKey && savedKey !== 'YOUR_GEMINI_API_KEY_HERE') {
+        CONFIG.GEMINI_API_KEY = savedKey;
+        return;
+    }
+    
+    // Show API modal FIRST
+    setTimeout(() => {
+        document.getElementById('apiKeyModal').style.display = 'flex';
+        document.body.style.overflow = 'hidden';
+    }, 1000);
+}
+
+// API Key Modal - Save
+document.getElementById('saveApiKey').addEventListener('click', () => {
+    const apiKey = document.getElementById('apiKeyInput').value.trim();
+    
+    if (!apiKey) {
+        showToast('API Key Required', 'Please enter your Gemini API key', 'warning');
+        return;
+    }
+    
+    if (apiKey.length < 20) {
+        showToast('Invalid Key', 'API key seems too short. Please check.', 'warning');
+        return;
+    }
+    
+    CONFIG.GEMINI_API_KEY = apiKey;
+    localStorage.setItem('gemini_api_key', apiKey);
+    
+    document.getElementById('apiKeyModal').style.display = 'none';
+    document.body.style.overflow = '';
+    
+    showToast('API Key Saved! 🎉', 'AI features are now enabled', 'success');
+});
+
+// API Key Modal - Skip
+document.getElementById('skipApiKey').addEventListener('click', () => {
+    document.getElementById('apiKeyModal').style.display = 'none';
+    document.body.style.overflow = '';
+    showToast('Demo Mode', 'Using simulated AI responses. Add API key later for full features.', 'info');
+});
+
+// Profile Modal - Open
 document.getElementById('userAvatarBtn').addEventListener('click', (e) => {
     e.stopPropagation();
     openProfileModal();
 });
 
 function openProfileModal() {
-    // Load saved data
+    // Load data
     document.getElementById('profileName').value = profileData.name;
     document.getElementById('profileEmail').value = profileData.email;
     document.getElementById('profileCompany').value = profileData.company;
@@ -118,14 +174,11 @@ function openProfileModal() {
     document.getElementById('profileLocation').value = profileData.location;
     document.getElementById('profileIndustry').value = profileData.industry;
     
-    // Show modal
     document.getElementById('profileModal').style.display = 'flex';
-    
-    // Prevent body scroll
     document.body.style.overflow = 'hidden';
 }
 
-// Close Profile Modal
+// Profile Modal - Close
 function closeProfileModal() {
     document.getElementById('profileModal').style.display = 'none';
     document.body.style.overflow = '';
@@ -134,24 +187,7 @@ function closeProfileModal() {
 document.getElementById('closeProfileModal').addEventListener('click', closeProfileModal);
 document.getElementById('cancelProfile').addEventListener('click', closeProfileModal);
 
-// Close on outside click
-document.getElementById('profileModal').addEventListener('click', (e) => {
-    if (e.target.id === 'profileModal') {
-        closeProfileModal();
-    }
-});
-
-// Close on Escape key
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        const modal = document.getElementById('profileModal');
-        if (modal && modal.style.display === 'flex') {
-            closeProfileModal();
-        }
-    }
-});
-
-// Save Profile
+// Profile Modal - Save
 document.getElementById('saveProfile').addEventListener('click', () => {
     const name = document.getElementById('profileName').value.trim();
     const email = document.getElementById('profileEmail').value.trim();
@@ -160,20 +196,17 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     const location = document.getElementById('profileLocation').value.trim();
     const industry = document.getElementById('profileIndustry').value;
     
-    // Validation
     if (!name) {
         showToast('Name Required', 'Please enter your full name', 'warning');
-        document.getElementById('profileName').focus();
         return;
     }
     
     if (email && !email.includes('@')) {
-        showToast('Invalid Email', 'Please enter a valid email address', 'warning');
-        document.getElementById('profileEmail').focus();
+        showToast('Invalid Email', 'Please enter a valid email', 'warning');
         return;
     }
     
-    // Save to localStorage
+    // Save
     profileData.name = name;
     profileData.email = email;
     profileData.company = company;
@@ -188,22 +221,193 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     localStorage.setItem('profile_location', location);
     localStorage.setItem('profile_industry', industry);
     
+    updateUserNameDisplay();
     closeProfileModal();
     
-    showToast('Profile Saved! 🎉', `Welcome back, ${name}!`, 'success');
+    showToast('Profile Saved! 🎉', `Welcome, ${name}!`, 'success');
 });
 
-// Store variants for export
-let currentVariants = [];
+// Close modals on outside click
+document.getElementById('profileModal').addEventListener('click', (e) => {
+    if (e.target.id === 'profileModal') closeProfileModal();
+});
 
+// Close on Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        const profileModal = document.getElementById('profileModal');
+        const apiModal = document.getElementById('apiKeyModal');
+        
+        if (profileModal && profileModal.style.display === 'flex') {
+            closeProfileModal();
+        }
+    }
+});
+
+// Initialize
+updateUserNameDisplay();
+
+// ===========================
+// Export as PDF/TXT
+// ===========================
+
+// Export Analytics as PDF
+document.getElementById('exportAnalyticsPDF').addEventListener('click', () => {
+    const content = generateAnalyticsReport();
+    
+    // Create a printable HTML
+    const printWindow = window.open('', '', 'width=800,height=600');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>CreativeSync AI - Analytics Report</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 40px; }
+                h1 { color: #667eea; }
+                h2 { color: #333; margin-top: 20px; }
+                table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+                th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                th { background: #667eea; color: white; }
+                .header { text-align: center; margin-bottom: 30px; }
+                .footer { margin-top: 40px; text-align: center; color: #666; }
+            </style>
+        </head>
+        <body>
+            ${content}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    setTimeout(() => {
+        printWindow.print();
+        showToast('PDF Export', 'Print dialog opened. Save as PDF.', 'success');
+    }, 500);
+});
+
+// Export Analytics as TXT
+document.getElementById('exportAnalyticsTXT').addEventListener('click', () => {
+    const content = generateAnalyticsReportText();
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `creativesync-analytics-${Date.now()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    
+    showToast('TXT Exported!', 'Analytics report downloaded', 'success');
+});
+
+function generateAnalyticsReport() {
+    return `
+        <div class="header">
+            <h1>CreativeSync AI - Analytics Report</h1>
+            <p><strong>Generated By:</strong> ${profileData.name || 'User'}</p>
+            <p><strong>Company:</strong> ${profileData.company || 'N/A'}</p>
+            <p><strong>Date:</strong> ${new Date().toLocaleString('en-IN')}</p>
+        </div>
+        
+        <h2>Performance Overview</h2>
+        <table>
+            <tr>
+                <th>Metric</th>
+                <th>Value</th>
+            </tr>
+            <tr>
+                <td>Total Campaigns</td>
+                <td>${state.campaigns.length}</td>
+            </tr>
+            <tr>
+                <td>Active Campaigns</td>
+                <td>${state.campaigns.filter(c => c.status === 'Active').length}</td>
+            </tr>
+            <tr>
+                <td>Total Impressions</td>
+                <td>${state.metrics.impressions.toLocaleString()}</td>
+            </tr>
+            <tr>
+                <td>Total Clicks</td>
+                <td>${state.metrics.clicks.toLocaleString()}</td>
+            </tr>
+            <tr>
+                <td>Average CTR</td>
+                <td>${state.metrics.ctr}%</td>
+            </tr>
+        </table>
+        
+        <h2>Campaign Details</h2>
+        <table>
+            <tr>
+                <th>Campaign Name</th>
+                <th>Status</th>
+                <th>Impressions</th>
+                <th>Clicks</th>
+                <th>CTR</th>
+            </tr>
+            ${state.campaigns.map(c => `
+                <tr>
+                    <td>${c.name}</td>
+                    <td>${c.status}</td>
+                    <td>${c.metrics?.impressions?.toLocaleString() || 0}</td>
+                    <td>${c.metrics?.clicks?.toLocaleString() || 0}</td>
+                    <td>${c.metrics?.ctr || 0}%</td>
+                </tr>
+            `).join('')}
+        </table>
+        
+        <div class="footer">
+            <p>Generated by CreativeSync AI - Powered by Google Gemini</p>
+        </div>
+    `;
+}
+
+function generateAnalyticsReportText() {
+    return `
+CREATIVESYNC AI - ANALYTICS REPORT
+===================================
+
+Generated By: ${profileData.name || 'User'}
+Company: ${profileData.company || 'N/A'}
+Email: ${profileData.email || 'N/A'}
+Date: ${new Date().toLocaleString('en-IN')}
+
+PERFORMANCE OVERVIEW
+--------------------
+Total Campaigns: ${state.campaigns.length}
+Active Campaigns: ${state.campaigns.filter(c => c.status === 'Active').length}
+Total Impressions: ${state.metrics.impressions.toLocaleString()}
+Total Clicks: ${state.metrics.clicks.toLocaleString()}
+Average CTR: ${state.metrics.ctr}%
+
+CAMPAIGN DETAILS
+----------------
+${state.campaigns.map(c => `
+Campaign: ${c.name}
+Status: ${c.status}
+Impressions: ${c.metrics?.impressions?.toLocaleString() || 0}
+Clicks: ${c.metrics?.clicks?.toLocaleString() || 0}
+CTR: ${c.metrics?.ctr || 0}%
+---
+`).join('\n')}
+
+Generated by CreativeSync AI
+Powered by Google Gemini AI
+    `.trim();
+}
+
+// Export Variants (keep existing functionality)
 function showExportButton() {
-    const exportBtn = document.getElementById('exportVariantsBtn');
-    if (exportBtn && currentVariants.length > 0) {
-        exportBtn.style.display = 'inline-flex';
+    const btn = document.getElementById('exportVariantsBtn');
+    if (btn && currentVariants.length > 0) {
+        btn.style.display = 'inline-flex';
     }
 }
 
-// Rest of export code remains same...
+// Update displayVariant to store variants
+// (Add this at end of displayVariant function)
+// currentVariants.push(variant);
+// showExportButton();
 
 // ===========================
 // Multi-Variant Export Functionality
@@ -2744,6 +2948,7 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
 
