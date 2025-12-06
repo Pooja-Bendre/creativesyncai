@@ -77,18 +77,20 @@ function generateRealisticData() {
 
 function checkAPIKey() {
     const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey) {
+    if (savedKey && savedKey !== '' && savedKey.length > 20) {
         CONFIG.GEMINI_API_KEY = savedKey;
-        // Don't show modal if key exists
+        updateAPIIndicator();
         return;
     }
     
-    // Show API modal ONLY if no key exists
-    if (CONFIG.GEMINI_API_KEY === 'YOUR_GEMINI_API_KEY_HERE' || !CONFIG.GEMINI_API_KEY) {
-        setTimeout(() => {
-            document.getElementById('apiKeyModal').style.display = 'flex';
-        }, 1500); // Show after 1.5 seconds
-    }
+    // Show beautiful Clerk-style API modal
+    setTimeout(() => {
+        const modal = document.getElementById('apiKeyModal');
+        if (modal) {
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    }, 1500);
 }
 
 // ===========================
@@ -105,31 +107,32 @@ const profileData = {
 
 let currentVariants = [];
 
-// Update user name display
 function updateUserNameDisplay() {
     const displayName = profileData.name || 'Guest User';
     const nameElement = document.getElementById('userNameDisplay');
     if (nameElement) {
         nameElement.textContent = displayName;
     }
+    updateAPIIndicator();
 }
 
-// Check API Key on load
-function checkAPIKey() {
-    const savedKey = localStorage.getItem('gemini_api_key');
-    if (savedKey && savedKey !== 'YOUR_GEMINI_API_KEY_HERE') {
-        CONFIG.GEMINI_API_KEY = savedKey;
-        return;
-    }
+function updateAPIIndicator() {
+    const apiBtn = document.getElementById('apiSettingsBtn');
+    if (!apiBtn) return;
     
-    // Show API modal FIRST
-    setTimeout(() => {
-        document.getElementById('apiKeyModal').style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-    }, 1000);
+    const hasValidKey = CONFIG.GEMINI_API_KEY && 
+                       CONFIG.GEMINI_API_KEY.length > 20;
+    
+    if (hasValidKey) {
+        apiBtn.style.color = '#10b981';
+        apiBtn.title = 'API Connected ✅';
+    } else {
+        apiBtn.style.color = '#f59e0b';
+        apiBtn.title = 'Configure API Key ⚠️';
+    }
 }
 
-// API Key Modal - Save
+//api modal save
 document.getElementById('saveApiKey').addEventListener('click', () => {
     const apiKey = document.getElementById('apiKeyInput').value.trim();
     
@@ -149,6 +152,7 @@ document.getElementById('saveApiKey').addEventListener('click', () => {
     document.getElementById('apiKeyModal').style.display = 'none';
     document.body.style.overflow = '';
     
+    updateAPIIndicator();
     showToast('API Key Saved! 🎉', 'AI features are now enabled', 'success');
 });
 
@@ -221,7 +225,15 @@ document.getElementById('saveProfile').addEventListener('click', () => {
     localStorage.setItem('profile_location', location);
     localStorage.setItem('profile_industry', industry);
     
-    updateUserNameDisplay();
+    // Initialize
+updateUserNameDisplay();
+
+// API Settings Button
+document.getElementById('apiSettingsBtn')?.addEventListener('click', () => {
+    document.getElementById('apiKeyInput').value = '';
+    document.getElementById('apiKeyModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+});
     closeProfileModal();
     
     showToast('Profile Saved! 🎉', `Welcome, ${name}!`, 'success');
@@ -232,6 +244,16 @@ document.getElementById('profileModal').addEventListener('click', (e) => {
     if (e.target.id === 'profileModal') closeProfileModal();
 });
 
+document.getElementById('apiKeyModal').addEventListener('click', (e) => {
+    if (e.target.id === 'apiKeyModal') {
+        const hasKey = localStorage.getItem('gemini_api_key');
+        if (hasKey && hasKey.length > 20) {
+            document.getElementById('apiKeyModal').style.display = 'none';
+            document.body.style.overflow = '';
+        }
+    }
+});
+
 // Close on Escape
 document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') {
@@ -240,6 +262,14 @@ document.addEventListener('keydown', (e) => {
         
         if (profileModal && profileModal.style.display === 'flex') {
             closeProfileModal();
+        }
+        
+        if (apiModal && apiModal.style.display === 'flex') {
+            const hasKey = localStorage.getItem('gemini_api_key');
+            if (hasKey && hasKey.length > 20) {
+                apiModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
         }
     }
 });
@@ -2948,6 +2978,7 @@ if ("performance" in window) {
     }, 0);
   });
 }
+
 
 
 
